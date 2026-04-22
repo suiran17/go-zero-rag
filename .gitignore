@@ -15,8 +15,8 @@ gateway/gateway
 .DS_Store
 
 # internal dev files
-AGENTS.md
-docs/
-task_plan.md
-progress.md
-findings.md
+# AGENTS.md
+# docs/
+# task_plan.md
+# progress.md
+# findings.md
