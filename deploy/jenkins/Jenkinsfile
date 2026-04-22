@@ -1,0 +1,94 @@
+pipeline {
+    agent any
+
+    environment {
+        REGISTRY     = 'your-registry.example.com'
+        PROJECT      = 'rag'
+        IMAGE_TAG    = "${BUILD_NUMBER}"
+        KUBECONFIG   = '/root/.kube/config'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build & Push Images') {
+            parallel {
+                stage('docservice') {
+                    steps {
+                        dir('go-zero-rag') {
+                            sh """
+                                docker build -f docservice/Dockerfile \
+                                    -t ${REGISTRY}/${PROJECT}/docservice:${IMAGE_TAG} \
+                                    -t ${REGISTRY}/${PROJECT}/docservice:latest .
+                                docker push ${REGISTRY}/${PROJECT}/docservice:${IMAGE_TAG}
+                                docker push ${REGISTRY}/${PROJECT}/docservice:latest
+                            """
+                        }
+                    }
+                }
+                stage('aiservice') {
+                    steps {
+                        dir('go-zero-rag') {
+                            sh """
+                                docker build -f aiservice/Dockerfile \
+                                    -t ${REGISTRY}/${PROJECT}/aiservice:${IMAGE_TAG} \
+                                    -t ${REGISTRY}/${PROJECT}/aiservice:latest .
+                                docker push ${REGISTRY}/${PROJECT}/aiservice:${IMAGE_TAG}
+                                docker push ${REGISTRY}/${PROJECT}/aiservice:latest
+                            """
+                        }
+                    }
+                }
+                stage('gateway') {
+                    steps {
+                        dir('go-zero-rag') {
+                            sh """
+                                docker build -f gateway/Dockerfile \
+                                    -t ${REGISTRY}/${PROJECT}/gateway:${IMAGE_TAG} \
+                                    -t ${REGISTRY}/${PROJECT}/gateway:latest .
+                                docker push ${REGISTRY}/${PROJECT}/gateway:${IMAGE_TAG}
+                                docker push ${REGISTRY}/${PROJECT}/gateway:latest
+                            """
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to K8s') {
+            steps {
+                dir('go-zero-rag/deploy/k8s') {
+                    sh 'kubectl apply -f namespace.yaml'
+                    sh 'kubectl apply -f etcd.yaml'
+                    sh 'kubectl apply -f qdrant.yaml'
+                    sh 'kubectl apply -f configmap.yaml'
+                    sh 'kubectl apply -f docservice.yaml'
+                    sh 'kubectl apply -f aiservice.yaml'
+                    sh 'kubectl apply -f gateway.yaml'
+                    sh """
+                        kubectl -n rag set image deployment/docservice \
+                            docservice=${REGISTRY}/${PROJECT}/docservice:${IMAGE_TAG}
+                        kubectl -n rag set image deployment/aiservice \
+                            aiservice=${REGISTRY}/${PROJECT}/aiservice:${IMAGE_TAG}
+                        kubectl -n rag set image deployment/gateway \
+                            gateway=${REGISTRY}/${PROJECT}/gateway:${IMAGE_TAG}
+                    """
+                    sh 'kubectl -n rag rollout status deployment/gateway --timeout=120s'
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Deployed. Gateway: http://<node-ip>:31888"
+        }
+        failure {
+            sh 'kubectl -n rag get pods'
+        }
+    }
+}

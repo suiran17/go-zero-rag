@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aiservice
+  namespace: rag
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aiservice
+  template:
+    metadata:
+      labels:
+        app: aiservice
+    spec:
+      imagePullSecrets:
+        - name: docker-login
+      containers:
+        - name: aiservice
+          image: your-registry.example.com/rag/aiservice:latest
+          ports:
+            - containerPort: 8081
+          env:
+            - name: QWEN_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: rag-secret
+                  key: QWEN_API_KEY
+          volumeMounts:
+            - name: config
+              mountPath: /app/etc
+      volumes:
+        - name: config
+          configMap:
+            name: aiservice-config
+            items:
+              - key: ai.yaml
+                path: ai.yaml
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aiservice
+  namespace: rag
+spec:
+  selector:
+    app: aiservice
+  ports:
+    - port: 8081
+      targetPort: 8081

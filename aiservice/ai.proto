@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package ai;
+option go_package = "./pb";
+
+service Ai {
+  rpc Query(QueryReq) returns (QueryResp);
+}
+
+message QueryReq {
+  string question = 1;
+  int32  top_k    = 2;
+}
+
+message QueryResp {
+  string          answer  = 1;
+  repeated string sources = 2;
+}

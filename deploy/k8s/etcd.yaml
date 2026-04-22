@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: etcd
+  namespace: rag
+spec:
+  serviceName: etcd
+  replicas: 1
+  selector:
+    matchLabels:
+      app: etcd
+  template:
+    metadata:
+      labels:
+        app: etcd
+    spec:
+      containers:
+        - name: etcd
+          image: bitnamilegacy/etcd:3.6.4-debian-12-r4
+          env:
+            - name: ALLOW_NONE_AUTHENTICATION
+              value: "yes"
+          ports:
+            - containerPort: 2379
+          volumeMounts:
+            - name: data
+              mountPath: /bitnami/etcd
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: 1Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: etcd
+  namespace: rag
+spec:
+  clusterIP: None
+  selector:
+    app: etcd
+  ports:
+    - port: 2379
+      targetPort: 2379

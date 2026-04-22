@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package doc;
+option go_package = "./pb";
+
+service Doc {
+  rpc UploadDoc(UploadDocReq) returns (UploadDocResp);
+}
+
+message UploadDocReq {
+  string title   = 1;
+  string content = 2;
+}
+
+message UploadDocResp {
+  string doc_id      = 1;
+  int32  chunk_count = 2;
+}

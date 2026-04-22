@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway
+  namespace: rag
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gateway
+  template:
+    metadata:
+      labels:
+        app: gateway
+    spec:
+      imagePullSecrets:
+        - name: docker-login
+      containers:
+        - name: gateway
+          image: your-registry.example.com/rag/gateway:latest
+          ports:
+            - containerPort: 8888
+          volumeMounts:
+            - name: config
+              mountPath: /app/etc
+      volumes:
+        - name: config
+          configMap:
+            name: gateway-config
+            items:
+              - key: gateway.yaml
+                path: gateway.yaml
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway
+  namespace: rag
+spec:
+  type: NodePort
+  selector:
+    app: gateway
+  ports:
+    - port: 8888
+      targetPort: 8888
+      nodePort: 31888

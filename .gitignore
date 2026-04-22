@@ -1,0 +1,22 @@
+# binaries
+docservice/docservice
+aiservice/aiservice
+gateway/gateway
+
+# env
+.env
+*.env
+
+# ide
+.idea/
+.vscode/
+
+# os
+.DS_Store
+
+# internal dev files
+AGENTS.md
+docs/
+task_plan.md
+progress.md
+findings.md

@@ -1,0 +1,29 @@
+syntax = "v1"
+
+type (
+	UploadDocReq {
+		Title   string `json:"title"`
+		Content string `json:"content"`
+	}
+	UploadDocResp {
+		DocId      string `json:"doc_id"`
+		ChunkCount int    `json:"chunk_count"`
+	}
+	QueryReq {
+		Question string `json:"question"`
+		TopK     int    `json:"top_k,optional,default=3"`
+	}
+	QueryResp {
+		Answer  string   `json:"answer"`
+		Sources []string `json:"sources"`
+	}
+)
+
+service gateway {
+	@handler UploadDoc
+	post /api/doc/upload (UploadDocReq) returns (UploadDocResp)
+
+	@handler Query
+	post /api/qa/query (QueryReq) returns (QueryResp)
+}
+

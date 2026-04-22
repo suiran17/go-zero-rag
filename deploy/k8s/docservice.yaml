@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docservice
+  namespace: rag
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: docservice
+  template:
+    metadata:
+      labels:
+        app: docservice
+    spec:
+      imagePullSecrets:
+        - name: docker-login
+      containers:
+        - name: docservice
+          image: your-registry.example.com/rag/docservice:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: QWEN_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: rag-secret
+                  key: QWEN_API_KEY
+          volumeMounts:
+            - name: config
+              mountPath: /app/etc
+      volumes:
+        - name: config
+          configMap:
+            name: docservice-config
+            items:
+              - key: doc.yaml
+                path: doc.yaml
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: docservice
+  namespace: rag
+spec:
+  selector:
+    app: docservice
+  ports:
+    - port: 8080
+      targetPort: 8080
