@@ -17,7 +17,7 @@
 flowchart LR
     U[User / Client] --> G[gateway<br/>HTTP :8888]
     G --> D[docservice<br/>gRPC :8080]
-    G --> A[aiservice<br/>gRPC :8081]
+    G --> A[aiservice<br/>gRPC :8082]
     D --> E[etcd<br/>service registry]
     A --> E
     D --> Q[Qdrant<br/>vector store]
@@ -115,7 +115,7 @@ go run ./gateway -f gateway/etc/gateway.yaml
 默认端口：
 
 - `docservice`: `8080`
-- `aiservice`: `8081`
+- `aiservice`: `8082`
 - `gateway`: `8888`
 
 ## API 示例

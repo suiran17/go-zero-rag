@@ -75,7 +75,7 @@
 | README 文件检查 | README 需存在且覆盖运行说明 | 存在 README.md | 已创建并写入关键内容 | pass |
 | 本地 Embedding 接口 | bge-m3 @ localhost:1234 | 返回向量 | 返回 1024 维向量 | pass |
 | DeepSeek Chat 接口 | deepseek-chat + 真实 key | 返回答案 | key 有效，接口格式正确 | pass |
-| 本地端到端问答 | 上传文档并发起提问 | 返回答案与来源 | 单接口已验证，三服务整链路待跑 | partial |
+| 本地端到端问答 | 上传文档并发起提问 | 返回答案与来源 | 2026-06-18 三服务整链路实测打通，5 用例全 pass（见 端到端测试报告.md） | pass |
 | K8s 实际发布验证 | 应用集群资源并检查 rollout | Pod 正常运行、Gateway 可访问 | 受集群权限 + Embedding 可达性限制，未执行 | blocked |
 | GitHub public 发布 | https://github.com/suiran17/go-zero-rag | public 可访问，Mermaid 渲染正常 | Playwright 验证通过 | pass |
 
