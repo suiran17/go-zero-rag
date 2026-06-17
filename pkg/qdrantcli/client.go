@@ -8,18 +8,19 @@ import (
 	"net/http"
 )
 
-const (
-	CollectionName = "documents"
-	VectorSize     = 1536
-)
+const CollectionName = "documents"
 
 type Client struct {
-	addr string // e.g. "http://localhost:6333"
-	hc   *http.Client
+	addr       string // e.g. "http://localhost:6333"
+	vectorSize int    // embedding dimension; must match the embedding model
+	hc         *http.Client
 }
 
-func NewClient(addr string) *Client {
-	return &Client{addr: addr, hc: &http.Client{}}
+func NewClient(addr string, vectorSize int) *Client {
+	if vectorSize <= 0 {
+		vectorSize = 1024
+	}
+	return &Client{addr: addr, vectorSize: vectorSize, hc: &http.Client{}}
 }
 
 // EnsureCollection creates the collection if it does not already exist.
@@ -36,7 +37,7 @@ func (c *Client) EnsureCollection() error {
 
 	body, _ := json.Marshal(map[string]any{
 		"vectors": map[string]any{
-			"size":     VectorSize,
+			"size":     c.vectorSize,
 			"distance": "Cosine",
 		},
 	})

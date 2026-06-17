@@ -8,17 +8,17 @@ import (
 )
 
 type ServiceContext struct {
-	Config config.Config
-	Qwen   *embed.QwenClient
-	Qdrant *qdrantcli.Client
-	LLM    *llm.QwenChat
+	Config   config.Config
+	Embedder *embed.Client
+	Qdrant   *qdrantcli.Client
+	LLM      *llm.Client
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
 	return &ServiceContext{
-		Config: c,
-		Qwen:   embed.NewQwenClient(c.QwenApiKey),
-		Qdrant: qdrantcli.NewClient(c.QdrantAddr),
-		LLM:    llm.NewQwenChat(c.QwenApiKey, c.LLMModel),
+		Config:   c,
+		Embedder: embed.New(c.EmbedBaseURL, c.EmbedModel, c.EmbedApiKey),
+		Qdrant:   qdrantcli.NewClient(c.QdrantAddr, c.VectorSize),
+		LLM:      llm.New(c.LLMBaseURL, c.LLMModel, c.LLMApiKey),
 	}
 }

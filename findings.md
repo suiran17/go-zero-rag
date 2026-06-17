@@ -21,16 +21,18 @@
 ```
 上传阶段：
 文档文本 → 按段落分块（≤500 token）
-        → 通义千问 text-embedding-v3
+        → 本地 bge-m3 Embedding（1024 维）
         → 向量 + 原文存入 Qdrant
 
 查询阶段：
-用户问题 → 通义千问 Embedding
+用户问题 → 本地 bge-m3 Embedding
          → Qdrant Top-K 检索（默认 k=3）
          → 拼装 Prompt（检索段落 + 问题）
-         → 通义千问 / DeepSeek LLM
+         → DeepSeek deepseek-chat
          → 返回答案 + 来源段落
 ```
+
+> 2026-06-18 更新：Embedding/LLM 由通义千问切换为「本地 bge-m3 + DeepSeek」，均走 OpenAI 兼容接口；切 Embedding 模型时 `VectorSize` 必须与模型维度一致（bge-m3 = 1024）。
 
 ## 技术决策
 

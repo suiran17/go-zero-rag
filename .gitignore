@@ -3,9 +3,10 @@ docservice/docservice
 aiservice/aiservice
 gateway/gateway
 
-# env
+# env / secrets
 .env
 *.env
+一些配置.md
 
 # ide
 .idea/
@@ -13,6 +14,9 @@ gateway/gateway
 
 # os
 .DS_Store
+
+# k8s secret with real key (keep template, exclude filled version)
+# deploy/k8s/secret.yaml
 
 # internal dev files
 # AGENTS.md

@@ -21,11 +21,11 @@ spec:
           ports:
             - containerPort: 8081
           env:
-            - name: QWEN_API_KEY
+            - name: DEEPSEEK_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: rag-secret
-                  key: QWEN_API_KEY
+                  key: DEEPSEEK_API_KEY
           volumeMounts:
             - name: config
               mountPath: /app/etc

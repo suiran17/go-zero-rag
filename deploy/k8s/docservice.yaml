@@ -20,12 +20,7 @@ spec:
           image: your-registry.example.com/rag/docservice:latest
           ports:
             - containerPort: 8080
-          env:
-            - name: QWEN_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: rag-secret
-                  key: QWEN_API_KEY
+          # 本地 Embedding 无需 API Key；如改用需鉴权的 Embedding，再注入对应密钥
           volumeMounts:
             - name: config
               mountPath: /app/etc

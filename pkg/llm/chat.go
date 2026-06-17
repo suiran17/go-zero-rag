@@ -8,19 +8,21 @@ import (
 	"net/http"
 )
 
-const chatURL = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"
-
-type QwenChat struct {
-	apiKey string
-	model  string
-	hc     *http.Client
+// Client calls an OpenAI-compatible /v1/chat/completions endpoint. The same
+// client works for DeepSeek, Qwen DashScope compatible-mode, and local servers
+// — only baseURL, model and apiKey differ.
+type Client struct {
+	baseURL string // e.g. "https://api.deepseek.com/v1"
+	model   string
+	apiKey  string
+	hc      *http.Client
 }
 
-func NewQwenChat(apiKey, model string) *QwenChat {
+func New(baseURL, model, apiKey string) *Client {
 	if model == "" {
-		model = "qwen-plus"
+		model = "deepseek-chat"
 	}
-	return &QwenChat{apiKey: apiKey, model: model, hc: &http.Client{}}
+	return &Client{baseURL: baseURL, model: model, apiKey: apiKey, hc: &http.Client{}}
 }
 
 type Message struct {
@@ -28,15 +30,17 @@ type Message struct {
 	Content string `json:"content"`
 }
 
-func (c *QwenChat) Complete(messages []Message) (string, error) {
+func (c *Client) Complete(messages []Message) (string, error) {
 	body, _ := json.Marshal(map[string]any{
 		"model":    c.model,
 		"messages": messages,
 	})
 
-	req, _ := http.NewRequest(http.MethodPost, chatURL, bytes.NewReader(body))
-	req.Header.Set("Authorization", "Bearer "+c.apiKey)
+	req, _ := http.NewRequest(http.MethodPost, c.baseURL+"/chat/completions", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
+	if c.apiKey != "" {
+		req.Header.Set("Authorization", "Bearer "+c.apiKey)
+	}
 
 	resp, err := c.hc.Do(req)
 	if err != nil {
@@ -59,7 +63,7 @@ func (c *QwenChat) Complete(messages []Message) (string, error) {
 		return "", fmt.Errorf("decode chat response: %w", err)
 	}
 	if result.Error.Message != "" {
-		return "", fmt.Errorf("qwen chat error: %s", result.Error.Message)
+		return "", fmt.Errorf("chat error: %s", result.Error.Message)
 	}
 	if len(result.Choices) == 0 {
 		return "", fmt.Errorf("empty choices in response")

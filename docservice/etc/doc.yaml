@@ -4,5 +4,8 @@ Etcd:
   Hosts:
   - 127.0.0.1:2379
   Key: doc.rpc
-QwenApiKey: ${QWEN_API_KEY}
 QdrantAddr: http://127.0.0.1:6333
+VectorSize: 1024
+EmbedBaseURL: http://localhost:1234/v1
+EmbedModel: bge-m3
+EmbedApiKey: ""

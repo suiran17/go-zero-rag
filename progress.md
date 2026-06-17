@@ -46,14 +46,37 @@
   - deploy/k8s/docservice.yaml / aiservice.yaml / gateway.yaml（镜像地址脱敏）
 - **GitHub 仓库：** https://github.com/suiran17/go-zero-rag（public）
 
+## 会话：2026-06-18
+
+### 模型切换：本地 Embedding + DeepSeek LLM
+- **状态：** complete ✅
+- **背景：** 避免依赖通义千问云端 key，改用本地 Embedding 模型 + DeepSeek 生成
+- 执行的操作：
+  - `pkg/embed`：原 DashScope 专用客户端 → OpenAI 兼容 `/v1/embeddings` 客户端（支持无 key 的本地服务）
+  - `pkg/llm`：原通义千问 chat → 可配置 baseURL 的 OpenAI 兼容 chat 客户端（DeepSeek）
+  - `pkg/qdrantcli`：向量维度由硬编码 `1536` 改为可配置，默认 `1024`
+  - 两个 `config.go`：新增 `EmbedBaseURL/EmbedModel/EmbedApiKey/VectorSize`，aiservice 加 `LLMBaseURL/LLMModel/LLMApiKey`
+  - 两个 `servicecontext.go`：字段 `Qwen` → `Embedder`，接线新客户端
+  - 两个 `etc/*.yaml`：指向本地 `bge-m3`（`http://localhost:1234/v1`，1024 维）+ DeepSeek `deepseek-chat`
+  - `aiservice/ai.go`：加 `conf.UseEnv()`，使 `${DEEPSEEK_API_KEY}` 从环境变量展开（修复了原本 `${...}` 从未展开的隐藏 bug）
+  - README、K8s（configmap/secret/deployment）全部对齐新配置
+  - `.gitignore`：排除含明文 key 的 `一些配置.md`
+- 验证：
+  - `curl` 实测本地 `bge-m3`：返回 1024 维向量 ✓
+  - `curl` 实测 DeepSeek `deepseek-chat`：key 有效、接口格式正确 ✓
+  - `go build ./...` 通过 ✓
+- 未完成项：本地三服务端到端闭环、K8s 线上发布（需可达的 Embedding 地址）
+
 ## 测试结果
 
 | 测试 | 输入 | 预期结果 | 实际结果 | 状态 |
 |------|------|---------|---------|------|
 | `go build ./...` | 当前仓库全部 Go 代码 | 全部编译通过 | 编译通过，无输出 | pass |
 | README 文件检查 | README 需存在且覆盖运行说明 | 存在 README.md | 已创建并写入关键内容 | pass |
-| 本地端到端问答 | 上传文档并发起提问 | 返回答案与来源 | 受 `QWEN_API_KEY` 缺失限制，未执行 | blocked |
-| K8s 实际发布验证 | 应用集群资源并检查 rollout | Pod 正常运行、Gateway 可访问 | 受集群权限限制，未执行 | blocked |
+| 本地 Embedding 接口 | bge-m3 @ localhost:1234 | 返回向量 | 返回 1024 维向量 | pass |
+| DeepSeek Chat 接口 | deepseek-chat + 真实 key | 返回答案 | key 有效，接口格式正确 | pass |
+| 本地端到端问答 | 上传文档并发起提问 | 返回答案与来源 | 单接口已验证，三服务整链路待跑 | partial |
+| K8s 实际发布验证 | 应用集群资源并检查 rollout | Pod 正常运行、Gateway 可访问 | 受集群权限 + Embedding 可达性限制，未执行 | blocked |
 | GitHub public 发布 | https://github.com/suiran17/go-zero-rag | public 可访问，Mermaid 渲染正常 | Playwright 验证通过 | pass |
 
 ## 错误日志

@@ -11,8 +11,11 @@ data:
       Hosts:
         - etcd.rag.svc.cluster.local:2379
       Key: doc.rpc
-    QwenApiKey: ${QWEN_API_KEY}
     QdrantAddr: http://qdrant.rag.svc.cluster.local:6333
+    VectorSize: 1024
+    EmbedBaseURL: http://your-embedding-host:1234/v1  # 改为集群 Pod 可达的地址，勿用 localhost
+    EmbedModel: bge-m3
+    EmbedApiKey: ""
 
 ---
 apiVersion: v1
@@ -28,9 +31,14 @@ data:
       Hosts:
         - etcd.rag.svc.cluster.local:2379
       Key: ai.rpc
-    QwenApiKey: ${QWEN_API_KEY}
     QdrantAddr: http://qdrant.rag.svc.cluster.local:6333
-    LLMModel: qwen-plus
+    VectorSize: 1024
+    EmbedBaseURL: http://your-embedding-host:1234/v1  # 改为集群 Pod 可达的地址，勿用 localhost
+    EmbedModel: bge-m3
+    EmbedApiKey: ""
+    LLMBaseURL: https://api.deepseek.com/v1
+    LLMModel: deepseek-chat
+    LLMApiKey: ${DEEPSEEK_API_KEY}
 
 ---
 apiVersion: v1

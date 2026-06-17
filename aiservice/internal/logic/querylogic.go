@@ -32,7 +32,7 @@ func (l *QueryLogic) Query(in *pb.QueryReq) (*pb.QueryResp, error) {
 	}
 
 	// 1. Embed the question.
-	vecs, err := l.svcCtx.Qwen.Embed([]string{in.Question})
+	vecs, err := l.svcCtx.Embedder.Embed([]string{in.Question})
 	if err != nil {
 		return nil, fmt.Errorf("embed question: %w", err)
 	}

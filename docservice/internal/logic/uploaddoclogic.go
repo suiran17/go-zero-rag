@@ -35,8 +35,8 @@ func (l *UploadDocLogic) UploadDoc(in *pb.UploadDocReq) (*pb.UploadDocResp, erro
 		return nil, fmt.Errorf("empty content after chunking")
 	}
 
-	// 2. Embed all chunks via Qwen.
-	vectors, err := l.svcCtx.Qwen.Embed(chunks)
+	// 2. Embed all chunks.
+	vectors, err := l.svcCtx.Embedder.Embed(chunks)
 	if err != nil {
 		return nil, fmt.Errorf("embed: %w", err)
 	}

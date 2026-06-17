@@ -65,8 +65,9 @@
 | 框架：go-zero | 已有深度学习基础，有 rpc 通信需求 |
 | 单模块（无 go.work） | goctl 生成代码在同一 go.mod 下，不需要多模块 |
 | 向量库：Qdrant | Go SDK 完善，K8s 部署轻量，适合个人项目 |
-| Embedding：通义千问 text-embedding-v3 | 国内直连，中文效果好，免费额度够 |
-| LLM：通义千问 / DeepSeek | 国内直连，有免费 token |
+| Embedding：本地 bge-m3（1024 维，OpenAI 兼容） | 无需云端 key、零成本、可离线；2026-06-18 由通义千问 text-embedding-v3 切换 |
+| LLM：DeepSeek deepseek-chat（OpenAI 兼容） | 国内直连、便宜；2026-06-18 由通义千问切换 |
+| Embedding/LLM 走 OpenAI 兼容接口 | 客户端通用，改 baseURL/model 即可切换本地或云端模型 |
 | 分块：自实现 | 逻辑简单，面试可讲，无额外依赖 |
 | 部署：复用现有集群 | 3节点 kubeadm + Jenkins + GitLab + Docker |
 | 项目路径：/Users/zp/GIT/k8s-deploy/go-zero-rag | 当前阶段，后续独立为单独仓库 |
